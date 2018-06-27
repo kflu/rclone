@@ -4,6 +4,9 @@ package sync
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/exec"
+	"os/user"
 	"path"
 	"sort"
 	"sync"
@@ -289,6 +292,7 @@ func (s *syncCopyMove) pairRenamer(in fs.ObjectPairChan, out fs.ObjectPairChan, 
 func (s *syncCopyMove) pairCopyOrMove(in fs.ObjectPairChan, fdst fs.Fs, wg *sync.WaitGroup) {
 	defer wg.Done()
 	var err error
+	var newDst fs.Object
 	for {
 		if s.aborting() {
 			return
@@ -301,11 +305,19 @@ func (s *syncCopyMove) pairCopyOrMove(in fs.ObjectPairChan, fdst fs.Fs, wg *sync
 			src := pair.Src
 			accounting.Stats.Transferring(src.Remote())
 			if s.DoMove {
-				_, err = operations.Move(fdst, pair.Dst, src.Remote(), src)
+				newDst, err = operations.Move(fdst, pair.Dst, src.Remote(), src)
 			} else {
-				_, err = operations.Copy(fdst, pair.Dst, src.Remote(), src)
+				newDst, err = operations.Copy(fdst, pair.Dst, src.Remote(), src)
 			}
 			s.processError(err)
+
+			usr, err := user.Current()
+			script := path.Join(usr.HomeDir, "_rclone_oncreate")
+			if _, err := os.Stat(script); err == nil {
+				cmd := exec.Command(script, newDst.Remote())
+				cmd.Run()
+			}
+
 			accounting.Stats.DoneTransferring(src.Remote(), err == nil)
 		case <-s.ctx.Done():
 			return
