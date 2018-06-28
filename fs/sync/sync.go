@@ -312,7 +312,7 @@ func (s *syncCopyMove) pairCopyOrMove(in fs.ObjectPairChan, fdst fs.Fs, wg *sync
 
 			script := fs.Config.ScriptSyncCopy
 			if _, err := os.Stat(script); err == nil {
-				fmt.Printf("executing: %s %s", script, newDst.Remote())
+				fmt.Printf("executing: %s %s\n", script, newDst.Remote())
 				cmd := exec.Command(script, newDst.Remote())
 				var out []byte
 				out, err := cmd.CombinedOutput()
