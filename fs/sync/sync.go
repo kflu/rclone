@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"os/user"
 	"path"
 	"sort"
 	"sync"
@@ -311,11 +310,19 @@ func (s *syncCopyMove) pairCopyOrMove(in fs.ObjectPairChan, fdst fs.Fs, wg *sync
 			}
 			s.processError(err)
 
-			usr, err := user.Current()
-			script := path.Join(usr.HomeDir, "_rclone_oncreate")
+			script := fs.Config.ScriptSyncCopy
+			fmt.Println("script is", script)
 			if _, err := os.Stat(script); err == nil {
+				fmt.Println("executing the script")
 				cmd := exec.Command(script, newDst.Remote())
-				cmd.Run()
+				var out []byte
+				out, err := cmd.CombinedOutput()
+				fmt.Println(string(out))
+				if err != nil {
+					fmt.Println(err)
+				} else {
+					fmt.Println("cmd succeeded")
+				}
 			}
 
 			accounting.Stats.DoneTransferring(src.Remote(), err == nil)

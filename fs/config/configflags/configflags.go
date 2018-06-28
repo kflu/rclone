@@ -27,6 +27,7 @@ var (
 	bindAddr        string
 	disableFeatures string
 	noTraverse      bool
+	scriptSyncCopy  string
 )
 
 // AddFlags adds the non filing system specific flags to the command
@@ -83,6 +84,7 @@ func AddFlags(flagSet *pflag.FlagSet) {
 	flags.FVarP(flagSet, &fs.Config.StreamingUploadCutoff, "streaming-upload-cutoff", "", "Cutoff for switching to chunked upload if file size is unknown. Upload starts after reaching cutoff or when file ends.")
 	flags.FVarP(flagSet, &fs.Config.Dump, "dump", "", "List of items to dump from: "+fs.DumpFlagsList)
 	flags.FVarP(flagSet, &fs.Config.MaxTransfer, "max-transfer", "", "Maximum size of data to transfer.")
+	flags.StringVarP(flagSet, &fs.Config.ScriptSyncCopy, "on-synccopy", "", "", "call on sync copy is done")
 }
 
 // SetFlags converts any flags into config which weren't straight foward

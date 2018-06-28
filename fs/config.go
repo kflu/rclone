@@ -72,6 +72,7 @@ type ConfigInfo struct {
 	AskPassword           bool
 	UseServerModTime      bool
 	MaxTransfer           SizeSuffix
+	ScriptSyncCopy        string
 }
 
 // NewConfig creates a new config with everything set to the default
